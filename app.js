@@ -61,15 +61,16 @@ onCellInput = () => {
         localData[ele.id] = {};
         localData[ele.id]["value"] = ele.textContent;
         updateLocalStorage(localData);
-      }
-      else{
-          updateLocalStorage(localData)
+      } else {
+        updateLocalStorage(localData);
       }
     })
   );
 };
 
 document.addEventListener("DOMContentLoaded", function () {
+  localStorage.clear();
+  localData = {};
   drawTable();
   onCellInput();
 });
