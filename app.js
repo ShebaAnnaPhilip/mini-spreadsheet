@@ -1,13 +1,13 @@
-// local storage initialization
-const initLocalStorage = () => {
+// local storage data
+const getLocalStorageData = () => {
   const serializedData = localStorage.getItem("localData");
   if (serializedData === null) return {};
   return JSON.parse(serializedData);
 };
 
-let localData = initLocalStorage();
+let localData = getLocalStorageData();
 
-//update localStorage
+//update localStorage - data
 const updateLocalStorage = (data) => {
   const serializedData = JSON.stringify(data);
   localStorage.setItem("localData", serializedData);
@@ -22,19 +22,73 @@ const getCellData = () => {
   );
 };
 
+const getCellStyle = () => {
+    Object.keys(localStyle).map(
+      (key) =>{
+          if(localStyle[key].fontWeight){
+            document.querySelector(`#${key}`).style.fontWeight = localStyle[key].fontWeight;
+          }
+          else if(localStyle[key].fontStyle){
+            document.querySelector(`#${key}`).style.fontStyle = localStyle[key].fontStyle;
+          }
+          else if(localStyle[key].textDecoration){
+            document.querySelector(`#${key}`).style.textDecoration = localStyle[key].textDecoration
+          }
+         
+      });
+  };
+
+
+//Styling
+
+const getLocalStorageStyle = () => {
+  const serializedData = localStorage.getItem("localStyle");
+  if (serializedData === null) return {};
+  return JSON.parse(serializedData);
+};
+let selectedCell = "";
+let localStyle = getLocalStorageStyle();
+
+const updateLocalStorageStyle = (style) => {
+    const serializedData = JSON.stringify(style);
+    localStorage.setItem("localStyle", serializedData);
+  };
+
+document.querySelector("#bold").addEventListener("click", () => {
+  selectedCell.style.fontWeight = 600;
+  localStyle[selectedCell.id] = {};
+  localStyle[selectedCell.id]["fontWeight"] = 600;
+  updateLocalStorageStyle(localStyle);
+});
+document.querySelector("#italic").addEventListener("click", () => {
+  selectedCell.style.fontStyle = "italic";
+  localStyle[selectedCell.id] = {};
+  localStyle[selectedCell.id]["fontStyle"] = "italic";
+  updateLocalStorageStyle(localStyle);
+});
+document.querySelector("#underline").addEventListener("click", () => {
+  selectedCell.style.textDecoration = "underline";
+  localStyle[selectedCell.id] = {};
+  localStyle[selectedCell.id]["textDecoration"] = "underline";
+  updateLocalStorageStyle(localStyle);
+});
+
 //on click of Refresh
 document.querySelector("#btnRefresh").addEventListener("click", () => {
-  let table = document.querySelector("#table");
-  table.removeChild(table.firstChild);
-  localData = initLocalStorage();
-  drawTable();
-  onCellInput();
-  getCellData();
-});
-// convert the alphaNumeric to Numeric
+    let table = document.querySelector("#table");
+    table.removeChild(table.firstChild);
+    localData = getLocalStorageData();
+    localStyle = getLocalStorageStyle();
+    drawTable();
+    onCellInput();
+    getCellData();
+    getCellStyle();
+  });
+
+//convert the alphaNumeric to Numeric
 const getNumericValue = (formula, regAlphaNumeric) =>
   formula.replace(regAlphaNumeric, (key) =>
-    "formula" in localData[key] ? sheba[key].localData : localData[key].value
+    "formula" in localData[key] ? localData[key].formula : localData[key].value
   );
 
 // Basic functions
@@ -109,8 +163,8 @@ onCellInput = () => {
   let INPUTS = [...document.querySelectorAll("#table td")];
   INPUTS.map((ele) =>
     ele.addEventListener("focus", () => {
-        console.log("focus")
       if (ele.textContent) {
+        selectedCell = ele;
         ele.textContent = localData[ele.id]["value"];
       }
     })
@@ -118,8 +172,8 @@ onCellInput = () => {
 
   INPUTS.map((ele) =>
     ele.addEventListener("blur", () => {
-        console.log("blur")
       if (ele.textContent) {
+        selectedCell = ele;
         localData[ele.id] = {};
         localData[ele.id]["value"] = ele.textContent;
         if (ele.textContent.startsWith("=")) {
