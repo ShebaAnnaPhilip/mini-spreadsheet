@@ -32,18 +32,38 @@ document.querySelector("#btnRefresh").addEventListener("click", () => {
   getCellData();
 });
 // convert the alphaNumeric to Numeric
-const getNumericValue = (formula, regAlpha) =>
-  formula.replace(regAlpha, (key) =>
+const getNumericValue = (formula, regAlphaNumeric) =>
+  formula.replace(regAlphaNumeric, (key) =>
     "formula" in localData[key] ? sheba[key].localData : localData[key].value
   );
 
 // Basic functions
 const addFormula = (key, value) => {
-  const regAlpha = /[A-Z]\w*[0-9]/g;
+  const regExp = /[a-zA-Z]+\(+[0-9]*\.*[0-9]+\:+([0-9]*\.*[0-9]*\:*[0-9])*\)/g;
+  const regExpSum = /sum\(+[0-9]*\.*[0-9]+\:+([0-9]*\.*[0-9]*\:*[0-9])*\)/gi;
+  const regExpBrackets = /\(([^)]+)\)/;
+  const regAlphaNumeric = /[A-Z]\w*[0-9]/g;
 
   let result = "";
   const formula = value.substr(1).toUpperCase();
-  const numericValue = getNumericValue(formula, regAlpha);
+  let numericValue = getNumericValue(formula, regAlphaNumeric);
+  if (numericValue.match(regExp)) {
+    if (numericValue.match(regExpSum)) {
+      const reducer = (acc, current) => parseInt(acc) + parseInt(current);
+      var matchingExp = formula.match(regExpBrackets)[1].split(":");
+      var col = matchingExp.map((e) => e.replace(/[^a-z]/gi, ""))[1];
+      var rowStart = matchingExp.map((e) => e.replace(/[a-z]/gi, ""))[0];
+      var rowend = matchingExp.map((e) => e.replace(/[a-z]/gi, ""))[1];
+
+      numericValue = Array.from(
+        { length: rowend },
+        (v, rowStart) => rowStart + 1
+      )
+        .map((row) => `${col}` + row)
+        .map((el) => localData[el].value)
+        .reduce(reducer);
+    }
+  }
   result = eval(numericValue);
 
   if (result) {
@@ -89,6 +109,7 @@ onCellInput = () => {
   let INPUTS = [...document.querySelectorAll("#table td")];
   INPUTS.map((ele) =>
     ele.addEventListener("focus", () => {
+        console.log("focus")
       if (ele.textContent) {
         ele.textContent = localData[ele.id]["value"];
       }
@@ -97,6 +118,7 @@ onCellInput = () => {
 
   INPUTS.map((ele) =>
     ele.addEventListener("blur", () => {
+        console.log("blur")
       if (ele.textContent) {
         localData[ele.id] = {};
         localData[ele.id]["value"] = ele.textContent;
