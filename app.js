@@ -104,14 +104,14 @@ const addFormula = (key, value) => {
   if (numericValue.match(regExp)) {
     if (numericValue.match(regExpSum)) {
       const reducer = (acc, current) => parseInt(acc) + parseInt(current);
-      var matchingExp = formula.match(regExpBrackets)[1].split(":");
-      var col = matchingExp.map((e) => e.replace(/[^a-z]/gi, ""))[1];
-      var rowStart = matchingExp.map((e) => e.replace(/[a-z]/gi, ""))[0];
-      var rowend = matchingExp.map((e) => e.replace(/[a-z]/gi, ""))[1];
+      let matchingExp = formula.match(regExpBrackets)[1].split(":");
+      let col = matchingExp.map((e) => e.replace(/[^a-z]/gi, ""))[1];
+      let rowStart = matchingExp.map((e) => e.replace(/[a-z]/gi, ""))[0];
+      let rowend = matchingExp.map((e) => e.replace(/[a-z]/gi, ""))[1];
 
       numericValue = Array.from(
         { length: rowend },
-        (v, rowStart) => rowStart + 1
+        (v, rowStart) => rowStart + 1                 // creates an array with eg: 5 indexes and value undefined
       )
         .map((row) => `${col}` + row)
         .map((el) => localData[el].value)
@@ -142,10 +142,10 @@ const convertNumToAlpha = (number) => {
 //draw 100X100 cells
 const drawTable = () => {
   for (let i = 0; i < 101; i++) {
-    let row = document.querySelector("#table").insertRow(-1);
+    let row = document.querySelector("#table").insertRow(-1); // adds a row row to the end
     for (let j = 0; j < 101; j++) {
       let columnLetter = convertNumToAlpha(j);
-      let cell = row.insertCell();
+      let cell = row.insertCell(); // adds a cell
       cell.setAttribute("contenteditable", true);
       if (i && j) {
         cell.id = columnLetter + i;
@@ -160,7 +160,7 @@ const drawTable = () => {
 
 //on cell input
 onCellInput = () => {
-  let INPUTS = [...document.querySelectorAll("#table td")];
+  let INPUTS = [...document.querySelectorAll("#table td")];  // to convert node list to array
   INPUTS.map((ele) =>
     ele.addEventListener("focus", () => {
       if (ele.textContent) {
